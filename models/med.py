@@ -177,34 +177,36 @@ class BertSelfAttention(nn.Module):
         # Check for mismatch in tensor shapes
         query_shape = query_layer.shape
         key_shape = key_layer.shape
-        print("Query layer shape:", query_layer.shape)
-        print("Key layer shape:", key_layer.shape)
+        print("Query before:", query_layer.shape)
+        print("Key before:", key_layer.shape)
+        print("-"*5)
 
-        if query_shape[0] != key_shape[0]:
-            # Case 1: Beam search expansion - key_layer is larger
-            if key_shape[0] > query_shape[0] and key_shape[0] % query_shape[0] == 0:
-                beam_size = key_shape[0] // query_shape[0]
-                query_layer = query_layer.repeat_interleave(beam_size, dim=0)
-            # Case 2: Query layer is larger - repeat key_layer
-            elif query_shape[0] > key_shape[0] and query_shape[0] % key_shape[0] == 0:
-                repeat_factor = query_shape[0] // key_shape[0]
-                key_layer = key_layer.repeat(repeat_factor, 1, 1)
-            # Case 3: Incompatible sizes - truncate to the minimum size
-            else:
-                min_batch = min(query_shape[0], key_shape[0])
-                query_layer = query_layer[:min_batch]
-                key_layer = key_layer[:min_batch]
+        # if query_shape[0] != key_shape[0]:
+        #     # Case 1: Beam search expansion - key_layer is larger
+        #     if key_shape[0] > query_shape[0] and key_shape[0] % query_shape[0] == 0:
+        #         beam_size = key_shape[0] // query_shape[0]
+        #         query_layer = query_layer.repeat_interleave(beam_size, dim=0)
+        #     # Case 2: Query layer is larger - repeat key_layer
+        #     elif query_shape[0] > key_shape[0] and query_shape[0] % key_shape[0] == 0:
+        #         repeat_factor = query_shape[0] // key_shape[0]
+        #         key_layer = key_layer.repeat(repeat_factor, 1, 1)
+        #     # Case 3: Incompatible sizes - truncate to the minimum size
+        #     else:
+        #         min_batch = min(query_shape[0], key_shape[0])
+        #         query_layer = query_layer[:min_batch]
+        #         key_layer = key_layer[:min_batch]
 
-        # Check for sequence length mismatch
-        if query_shape[2] != key_shape[2]:
-            # Truncate to the minimum sequence length
-            min_seq_len = min(query_shape[2], key_shape[2])
-            query_layer = query_layer[:, :, :min_seq_len]
-            key_layer = key_layer[:, :, :min_seq_len]
+        # # Check for sequence length mismatch
+        # if query_shape[2] != key_shape[2]:
+        #     # Truncate to the minimum sequence length
+        #     min_seq_len = min(query_shape[2], key_shape[2])
+        #     query_layer = query_layer[:, :, :min_seq_len]
+        #     key_layer = key_layer[:, :, :min_seq_len]
 
-        # Take the dot product between "query" and "key" to get the raw attention scores.
-        print("Query layer shape after adjustment:", query_layer.shape)
-        print("Key layer shape after adjustment:", key_layer.shape)
+        # # Take the dot product between "query" and "key" to get the raw attention scores.
+        # print("Query after:", query_layer.shape)
+        # print("Key after:", key_layer.shape)
+        # print("-"*10)
         attention_scores = torch.matmul(query_layer, key_layer.transpose(-1, -2))
 
         if self.position_embedding_type == "relative_key" or self.position_embedding_type == "relative_key_query":
@@ -228,6 +230,7 @@ class BertSelfAttention(nn.Module):
             # Apply the attention mask is (precomputed for all layers in BertModel forward() function)
             print("Attention mask shape:", attention_mask.shape)
             print("Attention scores shape before mask:", attention_scores.shape)
+            print("-"*10)
             attention_scores = attention_scores + attention_mask
 
         # Normalize the attention scores to probabilities.
