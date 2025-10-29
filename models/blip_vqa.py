@@ -170,7 +170,7 @@ class BLIP_VQA(nn.Module):
 def blip_vqa(pretrained='',**kwargs):
     model = BLIP_VQA(**kwargs)
     if pretrained:
-        model,msg = load_checkpoint(model,pretrained)
+        model, msg = load_checkpoint(model,pretrained)
 #         assert(len(msg.missing_keys)==0)
     return model  
 

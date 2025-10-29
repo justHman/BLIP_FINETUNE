@@ -5,6 +5,7 @@ from torchvision.transforms.functional import InterpolationMode
 
 from data.coco_karpathy_dataset import coco_karpathy_train, coco_karpathy_caption_eval, coco_karpathy_retrieval_eval
 from data.nocaps_dataset import nocaps_eval
+from data.uitvic_dataset import UITVIC_DATASET
 from data.flickr30k_dataset import flickr30k_train, flickr30k_retrieval_eval
 from data.vqa_dataset import vqa_dataset
 from data.nlvr_dataset import nlvr_dataset
@@ -28,11 +29,33 @@ def create_dataset(dataset, config, min_scale=0.5):
         transforms.ToTensor(),
         normalize,
         ])  
-        
+    
     if dataset=='pretrain':
         dataset = pretrain_dataset(config['train_file'], config['laion_path'], transform_train)              
         return dataset  
     
+    elif dataset.lower() == 'uitvic':
+        train_dataset = UITVIC_DATASET(
+            transform=transform_train,
+            root=config["root"], split='train',
+            image_dir=config.get("train_image_dir", None), ann_path=config.get("train_ann", None),
+            prompt=config.get("prompt", 'một bức ảnh về ')
+        )
+        test_dataset = UITVIC_DATASET(
+            transform=transform_test,
+            root=config["root"], split='test',
+            image_dir=config.get("test_image_dir", None), ann_path=config.get("test_ann", None),
+            prompt=config.get("prompt", 'một bức ảnh về ')
+        )
+        val_dataset = UITVIC_DATASET(
+            transform=transform_test,
+            root=config["root"], split='valid',
+            image_dir=config.get("valid_image_dir", None), ann_path=config.get("valid_ann", None),
+            prompt=config.get("prompt", 'một bức ảnh về ')
+        )
+
+        return train_dataset, val_dataset, test_dataset
+                                       
     elif dataset=='caption_coco':   
         train_dataset = coco_karpathy_train(transform_train, config['image_root'], config['ann_root'], prompt=config['prompt'])
         val_dataset = coco_karpathy_caption_eval(transform_test, config['image_root'], config['ann_root'], 'val')
