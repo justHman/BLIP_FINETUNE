@@ -4,12 +4,7 @@ from torchvision import transforms
 from torchvision.transforms.functional import InterpolationMode
 
 from data.coco_karpathy_dataset import coco_karpathy_train, coco_karpathy_caption_eval, coco_karpathy_retrieval_eval
-from data.nocaps_dataset import nocaps_eval
 from data.uitvic_dataset import UITVIC_DATASET
-from data.flickr30k_dataset import flickr30k_train, flickr30k_retrieval_eval
-from data.vqa_dataset import vqa_dataset
-from data.nlvr_dataset import nlvr_dataset
-from data.pretrain_dataset import pretrain_dataset
 from transform.randaugment import RandomAugment
 
 def create_dataset(dataset, config, min_scale=0.5):
@@ -30,11 +25,7 @@ def create_dataset(dataset, config, min_scale=0.5):
         normalize,
         ])  
     
-    if dataset=='pretrain':
-        dataset = pretrain_dataset(config['train_file'], config['laion_path'], transform_train)              
-        return dataset  
-    
-    elif dataset.lower() == 'uitvic':
+    if dataset.lower() == 'uitvic':
         train_dataset = UITVIC_DATASET(
             transform=transform_train,
             root=config["root"], split='train',
@@ -62,34 +53,11 @@ def create_dataset(dataset, config, min_scale=0.5):
         test_dataset = coco_karpathy_caption_eval(transform_test, config['image_root'], config['ann_root'], 'test')   
         return train_dataset, val_dataset, test_dataset
     
-    elif dataset=='nocaps':   
-        val_dataset = nocaps_eval(transform_test, config['image_root'], config['ann_root'], 'val')
-        test_dataset = nocaps_eval(transform_test, config['image_root'], config['ann_root'], 'test')   
-        return val_dataset, test_dataset   
-    
     elif dataset=='retrieval_coco':          
         train_dataset = coco_karpathy_train(transform_train, config['image_root'], config['ann_root'])
         val_dataset = coco_karpathy_retrieval_eval(transform_test, config['image_root'], config['ann_root'], 'val') 
         test_dataset = coco_karpathy_retrieval_eval(transform_test, config['image_root'], config['ann_root'], 'test')          
-        return train_dataset, val_dataset, test_dataset    
-    
-    elif dataset=='retrieval_flickr':          
-        train_dataset = flickr30k_train(transform_train, config['image_root'], config['ann_root'])
-        val_dataset = flickr30k_retrieval_eval(transform_test, config['image_root'], config['ann_root'], 'val') 
-        test_dataset = flickr30k_retrieval_eval(transform_test, config['image_root'], config['ann_root'], 'test')          
-        return train_dataset, val_dataset, test_dataset     
-    
-    elif dataset=='vqa': 
-        train_dataset = vqa_dataset(transform_train, config['ann_root'], config['vqa_root'], config['vg_root'], 
-                                    train_files = config['train_files'], split='train') 
-        test_dataset = vqa_dataset(transform_test, config['ann_root'], config['vqa_root'], config['vg_root'], split='test')
-        return train_dataset, test_dataset
-    
-    elif dataset=='nlvr': 
-        train_dataset = nlvr_dataset(transform_train, config['image_root'], config['ann_root'],'train')
-        val_dataset = nlvr_dataset(transform_test, config['image_root'], config['ann_root'],'val')
-        test_dataset = nlvr_dataset(transform_test, config['image_root'], config['ann_root'],'test')     
-        return train_dataset, val_dataset, test_dataset   
+        return train_dataset, val_dataset, test_dataset 
     
     
 def create_sampler(datasets, shuffles, num_tasks, global_rank):

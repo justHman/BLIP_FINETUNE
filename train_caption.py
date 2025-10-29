@@ -7,13 +7,7 @@
 '''
 import argparse
 import os
-import sys, importlib
 from ruamel.yaml import YAML
-
-# try:
-#     import ruamel_yaml as yaml
-# except ModuleNotFoundError:
-#     yaml = importlib.import_module("ruamel.yaml")
 
 import numpy as np
 import random
@@ -23,17 +17,14 @@ import json
 from pathlib import Path
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 import torch.distributed as dist
-from torch.utils.data import DataLoader
 
 from models.blip import blip_decoder
 import utils
 from utils import cosine_lr_schedule
 from data import create_dataset, create_sampler, create_loader
-from data.utils import save_result, coco_caption_eval, uitvic_caption_eval, uitvic_caption_eval_by_spacy
+from data.utils import save_result, uitvic_caption_eval, coco_caption_eval
 
 def train(model, data_loader, optimizer, epoch, device):
     # train
@@ -149,8 +140,8 @@ def main(args, config):
         test_result_file = save_result(test_result, args.result_dir, args.distributed, 'test_epoch%d'%epoch, remove_duplicate='image_id')  
 
         if utils.is_main_process():   
-            coco_val = uitvic_caption_eval(config['root'],val_result_file,'valid')
-            coco_test = uitvic_caption_eval(config['root'],test_result_file,'test')
+            coco_val = coco_caption_eval(config['root'], val_result_file, 'valid')
+            coco_test = coco_caption_eval(config['root'], test_result_file, 'test')
             
             if args.evaluate:            
                 log_stats = {**{f'val_{k}': v for k, v in coco_val.eval.items()},
