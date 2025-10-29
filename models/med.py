@@ -208,7 +208,7 @@ class BertSelfAttention(nn.Module):
         # print("Key after:", key_layer.shape)
         # print("-"*10)
         attention_scores = torch.matmul(query_layer, key_layer.transpose(-1, -2))
-        print("Attention scores:", attention_scores.shape)
+        print("Attention scores before:", attention_scores.shape)
         print("-"*10)
 
         if self.position_embedding_type == "relative_key" or self.position_embedding_type == "relative_key_query":
@@ -234,6 +234,7 @@ class BertSelfAttention(nn.Module):
             print("Attention scores shape before mask:", attention_scores.shape)
             print("-"*10)
             attention_scores = attention_scores + attention_mask
+            print("Attention scores after:", attention_scores.shape)
 
         # Normalize the attention scores to probabilities.
         attention_probs = nn.Softmax(dim=-1)(attention_scores)
