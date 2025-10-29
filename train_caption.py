@@ -99,11 +99,6 @@ def main(args, config):
         samplers = create_sampler([train_dataset,val_dataset,test_dataset], [True,False,False], num_tasks, global_rank)         
     else:
         samplers = [None, None, None]
-    
-    train_loader, val_loader, test_loader = create_loader([train_dataset, val_dataset, test_dataset],samplers,
-                                                          batch_size=[config['batch_size']]*3,num_workers=[4,4,4],
-                                                          is_trains=[True, False, False], collate_fns=[None,None,None])         
-
 
     if hasattr(args, 'quick_test') and args.quick_test:
         print("🚀 QUICK TEST MODE: Using only 10 samples for training!")
@@ -114,10 +109,14 @@ def main(args, config):
         if len(test_dataset) > 5:
             test_dataset.annotations = test_dataset.annotations[:5]
         print(f"Limited dataset sizes - Train: {len(train_dataset)}, Val: {len(val_dataset)}, Test: {len(test_dataset)}")
-        
+
         config["max_epoch"] = 1  
         config["batch_size"] = 2  
         print(f"🚀 QUICK TEST MODE: Setting max_epoch to {config['max_epoch']} and batch_size to {config['batch_size']}")
+
+    train_loader, val_loader, test_loader = create_loader([train_dataset, val_dataset, test_dataset],samplers,
+                                                          batch_size=[config['batch_size']]*3,num_workers=[4,4,4],
+                                                          is_trains=[True, False, False], collate_fns=[None,None,None])         
 
     print("Creating model")
     model = blip_decoder(pretrained=config['pretrained'], image_size=config['image_size'], vit=config['vit'], 
