@@ -208,6 +208,8 @@ class BertSelfAttention(nn.Module):
         # print("Key after:", key_layer.shape)
         # print("-"*10)
         attention_scores = torch.matmul(query_layer, key_layer.transpose(-1, -2))
+        print("Attention scores:", attention_scores.shape)
+        print("-"*10)
 
         if self.position_embedding_type == "relative_key" or self.position_embedding_type == "relative_key_query":
             seq_length = hidden_states.size()[1]
