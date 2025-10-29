@@ -107,18 +107,18 @@ def main(args, config):
 
     if hasattr(args, 'quick_test') and args.quick_test:
         print("🚀 QUICK TEST MODE: Using only 10 samples for training!")
-        # Limit training dataset to first 10 samples
-        if len(train_dataset) > 100:
-            train_dataset.annotations = train_dataset.annotations[:100]
-        # Limit validation/test to first 5 samples
-        if len(val_dataset) > 50:
-            val_dataset.annotations = val_dataset.annotations[:50]
-        if len(test_dataset) > 50:
-            test_dataset.annotations = test_dataset.annotations[:50]
-        
+        if len(train_dataset) > 10:
+            train_dataset.annotations = train_dataset.annotations[:10]
+        if len(val_dataset) > 5:
+            val_dataset.annotations = val_dataset.annotations[:5]
+        if len(test_dataset) > 5:
+            test_dataset.annotations = test_dataset.annotations[:5]
         print(f"Limited dataset sizes - Train: {len(train_dataset)}, Val: {len(val_dataset)}, Test: {len(test_dataset)}")
         
-    #### Model #### 
+        config["max_epoch"] = 1  
+        config["batch_size"] = 2  
+        print(f"🚀 QUICK TEST MODE: Setting max_epoch to {config['max_epoch']} and batch_size to {config['batch_size']}")
+
     print("Creating model")
     model = blip_decoder(pretrained=config['pretrained'], image_size=config['image_size'], vit=config['vit'], 
                            vit_grad_ckpt=config['vit_grad_ckpt'], vit_ckpt_layer=config['vit_ckpt_layer'], 
