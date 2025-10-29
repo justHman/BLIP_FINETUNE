@@ -104,6 +104,20 @@ def main(args, config):
                                                           batch_size=[config['batch_size']]*3,num_workers=[4,4,4],
                                                           is_trains=[True, False, False], collate_fns=[None,None,None])         
 
+
+    if hasattr(args, 'quick_test') and args.quick_test:
+        print("🚀 QUICK TEST MODE: Using only 10 samples for training!")
+        # Limit training dataset to first 10 samples
+        if len(train_dataset) > 100:
+            train_dataset.annotations = train_dataset.annotations[:100]
+        # Limit validation/test to first 5 samples
+        if len(val_dataset) > 50:
+            val_dataset.annotations = val_dataset.annotations[:50]
+        if len(test_dataset) > 50:
+            test_dataset.annotations = test_dataset.annotations[:50]
+        
+        print(f"Limited dataset sizes - Train: {len(train_dataset)}, Val: {len(val_dataset)}, Test: {len(test_dataset)}")
+        
     #### Model #### 
     print("Creating model")
     model = blip_decoder(pretrained=config['pretrained'], image_size=config['image_size'], vit=config['vit'], 
@@ -187,12 +201,13 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', default='uitvic')
     parser.add_argument('--config', default='./configs/uitvic.yaml')
     parser.add_argument('--output_dir', default='output/caption_uitvic')        
-    parser.add_argument('--evaluate', action='store_true')    
-    parser.add_argument('--device', default='cuda')
+    parser.add_argument('--evaluate', action='store_true')  
+    parser.add_argument('--quick_test', action='store_true', help='quick test mode with small dataset')  
+    parser.add_argument('--device', default='cpu')
     parser.add_argument('--seed', default=42, type=int)
     parser.add_argument('--world_size', default=1, type=int, help='number of distributed processes')    
     parser.add_argument('--dist_url', default='env://', help='url used to set up distributed training')
-    parser.add_argument('--distributed', default=True, type=bool)
+    parser.add_argument('--distributed', default=False, type=bool)
     args = parser.parse_args()
 
     yaml = YAML(typ='rt')

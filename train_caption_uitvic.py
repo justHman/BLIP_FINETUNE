@@ -28,7 +28,7 @@ import yaml
 # Import BLIP components
 from models.blip import blip_decoder
 from data import create_dataset, create_sampler, create_loader
-from data.utils import save_result, safe_uitvic_caption_eval
+from data.utils import save_result, coco_caption_eval
 from utils import cosine_lr_schedule
 import utils
 
@@ -575,8 +575,8 @@ def main(args, config):
             if utils.is_main_process():
                 try:
                     # Evaluate captions with proper encoding handling
-                    coco_val = safe_uitvic_caption_eval(config['root'], val_result_file, 'valid', logger)
-                    coco_test = safe_uitvic_caption_eval(config['root'], test_result_file, 'test', logger)
+                    coco_val = coco_caption_eval(config['root'], val_result_file, 'valid', logger)
+                    coco_test = coco_caption_eval(config['root'], test_result_file, 'test', logger)
                     
                     logger.log(f"Validation metrics: {coco_val.eval}")
                     logger.log(f"Test metrics: {coco_test.eval}")
