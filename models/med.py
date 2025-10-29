@@ -235,6 +235,7 @@ class BertSelfAttention(nn.Module):
             print("-"*10)
             attention_scores = attention_scores + attention_mask
             print("Attention scores after:", attention_scores.shape)
+            print("-"*10)
 
         # Normalize the attention scores to probabilities.
         attention_probs = nn.Softmax(dim=-1)(attention_scores)
