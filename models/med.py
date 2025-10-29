@@ -177,6 +177,8 @@ class BertSelfAttention(nn.Module):
         # Check for mismatch in tensor shapes
         query_shape = query_layer.shape
         key_shape = key_layer.shape
+        print("Query layer shape:", query_layer.shape)
+        print("Key layer shape:", key_layer.shape)
 
         if query_shape[0] != key_shape[0]:
             # Case 1: Beam search expansion - key_layer is larger
@@ -201,6 +203,8 @@ class BertSelfAttention(nn.Module):
             key_layer = key_layer[:, :, :min_seq_len]
 
         # Take the dot product between "query" and "key" to get the raw attention scores.
+        print("Query layer shape after adjustment:", query_layer.shape)
+        print("Key layer shape after adjustment:", key_layer.shape)
         attention_scores = torch.matmul(query_layer, key_layer.transpose(-1, -2))
 
         if self.position_embedding_type == "relative_key" or self.position_embedding_type == "relative_key_query":
@@ -222,6 +226,8 @@ class BertSelfAttention(nn.Module):
         attention_scores = attention_scores / math.sqrt(self.attention_head_size)
         if attention_mask is not None:
             # Apply the attention mask is (precomputed for all layers in BertModel forward() function)
+            print("Attention mask shape:", attention_mask.shape)
+            print("Attention scores shape before mask:", attention_scores.shape)
             attention_scores = attention_scores + attention_mask
 
         # Normalize the attention scores to probabilities.
