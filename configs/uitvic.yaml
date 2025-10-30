@@ -1,35 +1,36 @@
 # ============== Setup data paths ===================
-root: "/kaggle/working/uitvic-dataset/uitvic_dataset"
+root: "dataset/uitvic_dataset"
 
-train_image_dir: "/kaggle/working/uitvic-dataset/uitvic_dataset/coco_uitvic_train/coco_uitvic_train"
-train_ann: "/kaggle/working/uitvic-dataset/uitvic_dataset/uitvic_captions_train2017.json"
+train_image_dir: "dataset/uitvic_dataset/coco_uitvic_train/coco_uitvic_train"
+train_ann: "dataset/uitvic_dataset/uitvic_captions_train2017.json"
 
-valid_image_dir: "/kaggle/working/uitvic-dataset/uitvic_dataset/coco_uitvic_test/coco_uitvic_test"
-valid_ann: "/kaggle/working/uitvic-dataset/uitvic_dataset/uitvic_captions_test2017.json"
+valid_image_dir: "dataset/uitvic_dataset/coco_uitvic_test/coco_uitvic_test"
+valid_ann: "dataset/uitvic_dataset/uitvic_captions_test2017.json"
 
-test_image_dir: "/kaggle/working/uitvic-dataset/uitvic_dataset/coco_uitvic_test/coco_uitvic_test"
-test_ann: "/kaggle/working/uitvic-dataset/uitvic_dataset/uitvic_captions_test2017.json"
+test_image_dir: "dataset/uitvic_dataset/coco_uitvic_test/coco_uitvic_test"
+test_ann: "dataset/uitvic_dataset/uitvic_captions_test2017.json"
 # ============== Setup data paths ===================
 
 # set pretrained as a file path or an url
-pretrained: '/kaggle/working/model_base_capfilt_large.pth'
+pretrained: 'weights/model_base_capfilt_large.pth'
 
 # size of vit model; base or large
 vit: 'base'
 vit_grad_ckpt: False
 vit_ckpt_layer: 0
-batch_size: 2
+batch_size: 16
 init_lr: 1e-5
 
-image_size: 3
+image_size: 384  
 
 # generation configs
 max_length: 35  
 min_length: 5
 num_beams: 3
-prompt: 'mot buc anh ve '
+top_p: 0.9
+prompt: 'một bức ảnh về '
 
 # optimizer
 weight_decay: 0.05
 min_lr: 0
-max_epoch: 2
+max_epoch: 20

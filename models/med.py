@@ -175,11 +175,11 @@ class BertSelfAttention(nn.Module):
         past_key_value = (key_layer, value_layer)
 
         # Check for mismatch in tensor shapes
-        query_shape = query_layer.shape
-        key_shape = key_layer.shape
-        print("Query before:", query_layer.shape)
-        print("Key before:", key_layer.shape)
-        print("-"*5)
+        # query_shape = query_layer.shape
+        # key_shape = key_layer.shape
+        # print("Query before:", query_layer.shape)
+        # print("Key before:", key_layer.shape)
+        # print("-"*5)
 
         # if query_shape[0] != key_shape[0]:
         #     # Case 1: Beam search expansion - key_layer is larger
@@ -208,8 +208,7 @@ class BertSelfAttention(nn.Module):
         # print("Key after:", key_layer.shape)
         # print("-"*10)
         attention_scores = torch.matmul(query_layer, key_layer.transpose(-1, -2))
-        print("Attention scores before:", attention_scores.shape)
-        print("-"*10)
+        # print("Attention scores before:", attention_scores.shape)
 
         if self.position_embedding_type == "relative_key" or self.position_embedding_type == "relative_key_query":
             seq_length = hidden_states.size()[1]
@@ -230,12 +229,11 @@ class BertSelfAttention(nn.Module):
         attention_scores = attention_scores / math.sqrt(self.attention_head_size)
         if attention_mask is not None:
             # Apply the attention mask is (precomputed for all layers in BertModel forward() function)
-            print("Attention mask shape:", attention_mask.shape)
-            print("Attention scores shape before mask:", attention_scores.shape)
-            print("-"*10)
+            # print("Attention mask shape:", attention_mask.shape)
+            # print("-"*10)
             attention_scores = attention_scores + attention_mask
-            print("Attention scores after:", attention_scores.shape)
-            print("-"*10)
+            # print("Attention scores after:", attention_scores.shape)
+            # print("-"*10)
 
         # Normalize the attention scores to probabilities.
         attention_probs = nn.Softmax(dim=-1)(attention_scores)

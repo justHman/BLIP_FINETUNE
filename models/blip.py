@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore")
 
 from models.vit import VisionTransformer, interpolate_pos_embed
 from models.med import BertConfig, BertModel, BertLMHeadModel
-from transformers import BertTokenizer
+from transformers import BertTokenizer, AutoTokenizer
 
 import torch
 from torch import nn
@@ -126,23 +126,12 @@ class BLIP_Decoder(nn.Module):
         
     def generate(self, image, sample=False, num_beams=3, max_length=30, min_length=10, top_p=0.9, repetition_penalty=1.0):
         image_embeds = self.visual_encoder(image)
-
-        # image_atts = torch.ones(image_embeds.size()[:-1],dtype=torch.long).to(image.device)
-        # if not sample:
-        #     image_embeds = image_embeds.repeat_interleave(num_beams,dim=0)
-        #     image_atts = image_atts.repeat_interleave(num_beams, dim=0)
-            
-        # image_atts = torch.ones(image_embeds.size()[:-1],dtype=torch.long).to(image.device)
+        image_atts = torch.ones(image_embeds.size()[:-1],dtype=torch.long).to(image.device)
 
         if not sample:
-            # Tạo attention mask cho encoder trước khi expand
-            image_atts = torch.ones(image_embeds.size()[:-1],dtype=torch.long).to(image.device)
-            # Expand cả embeds và attention mask
-            image_embeds = image_embeds.repeat_interleave(num_beams, dim=0)
-            image_atts = image_atts.repeat_interleave(num_beams, dim=0)
-        else:
-            image_atts = torch.ones(image_embeds.size()[:-1],dtype=torch.long).to(image.device)
-
+            image_embeds = image_embeds.repeat_interleave(num_beams,dim=0)
+            # image_atts = image_atts.repeat_interleave(num_beams, dim=0)
+            
         model_kwargs = {"encoder_hidden_states": image_embeds, "encoder_attention_mask":image_atts}
         
         prompt = [self.prompt] * image.size(0)
@@ -195,7 +184,8 @@ def blip_feature_extractor(pretrained='',**kwargs):
     return model        
 
 def init_tokenizer():
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    # tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    tokenizer = AutoTokenizer.from_pretrained('vinai/phobert-base')
     tokenizer.add_special_tokens({'bos_token':'[DEC]'})
     tokenizer.add_special_tokens({'additional_special_tokens':['[ENC]']})       
     tokenizer.enc_token_id = tokenizer.additional_special_tokens_ids[0]  

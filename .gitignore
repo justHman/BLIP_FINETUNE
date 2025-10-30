@@ -1,4 +1,4 @@
 dataset/uitvic_dataset
 output/caption_uitvic
-weights/model_base_capfilt_large.pth
+weights/
 **/__pycache__/

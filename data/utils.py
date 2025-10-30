@@ -31,6 +31,36 @@ def pre_caption(caption,max_words=50):
             
     return caption
 
+def vn_pre_caption(caption, max_words=50):
+    """
+    Preprocess a caption for PhoBERT tokenizer.
+    Args:
+        caption (str): The input caption.
+        max_words (int): Maximum number of words to keep.
+    Returns:
+        str: The processed caption.
+    """
+    # Loại bỏ các ký tự không cần thiết, giữ lại dấu tiếng Việt
+    caption = re.sub(
+        r"([\"()*#:;~])",  # Loại bỏ các ký tự không cần thiết (trừ dấu câu tiếng Việt)
+        ' ',
+        caption.lower(),
+    )
+    caption = re.sub(
+        r"\s{2,}",  # Loại bỏ khoảng trắng thừa
+        ' ',
+        caption,
+    )
+    caption = caption.rstrip('\n')  # Loại bỏ ký tự xuống dòng
+    caption = caption.strip(' ')  # Loại bỏ khoảng trắng ở đầu và cuối
+
+    # Cắt ngắn caption nếu vượt quá số từ tối đa
+    caption_words = caption.split(' ')
+    if len(caption_words) > max_words:
+        caption = ' '.join(caption_words[:max_words])
+
+    return caption
+
 def pre_question(question,max_ques_words=50):
     question = re.sub(
         r"([.!\"()*#:;~])",

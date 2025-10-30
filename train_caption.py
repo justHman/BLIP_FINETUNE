@@ -15,6 +15,7 @@ import time
 import datetime
 import json
 from pathlib import Path
+from tqdm import tqdm
 
 import torch
 import torch.backends.cudnn as cudnn
@@ -36,7 +37,8 @@ def train(model, data_loader, optimizer, epoch, device):
     header = 'Train Caption Epoch: [{}]'.format(epoch)
     print_freq = 50
 
-    for i, (image, caption, _) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
+    loop = tqdm(metric_logger.log_every(data_loader, print_freq, header), desc=header)
+    for i, (image, caption, _) in enumerate(loop):
         image = image.to(device)       
         
         loss = model(image, caption)      
@@ -68,9 +70,15 @@ def evaluate(model, data_loader, device, config):
         
         image = image.to(device)       
         
-        captions = model.generate(image, sample=False, num_beams=config['num_beams'], max_length=config['max_length'], 
-                                  min_length=config['min_length'])
+        # captions = model.generate(
+        #   image, sample=False, num_beams=config['num_beams'], 
+        #   max_length=config['max_length'], min_length=config['min_length'])
         
+        captions = model.generate(
+            image, sample=True, top_p=config['top_p'], 
+            max_length=config['max_length'], min_length=config['min_length']
+        )
+
         for caption, img_id in zip(captions, image_id):
             result.append({"image_id": img_id.item(), "caption": caption})
   
@@ -110,9 +118,12 @@ def main(args, config):
             test_dataset.annotations = test_dataset.annotations[:5]
         print(f"Limited dataset sizes - Train: {len(train_dataset)}, Val: {len(val_dataset)}, Test: {len(test_dataset)}")
 
-        config["max_epoch"] = 1  
-        config["batch_size"] = 2  
-        print(f"🚀 QUICK TEST MODE: Setting max_epoch to {config['max_epoch']} and batch_size to {config['batch_size']}")
+        config['max_epoch'] = 1  
+        config['batch_size'] = 2  
+
+        print("🚀 QUICK TEST MODE: Overriding config")
+        print(f"- max_epoch: {config['max_epoch']}")
+        print(f"- batch_size: {config['batch_size']}")
 
     train_loader, val_loader, test_loader = create_loader([train_dataset, val_dataset, test_dataset],samplers,
                                                           batch_size=[config['batch_size']]*3,num_workers=[4,4,4],
@@ -153,12 +164,12 @@ def main(args, config):
         test_result_file = save_result(test_result, args.result_dir, args.distributed, 'test_epoch%d'%epoch, remove_duplicate='image_id')  
 
         if utils.is_main_process():   
-            coco_val = coco_caption_eval(config['root'], val_result_file, 'valid')
-            coco_test = coco_caption_eval(config['root'], test_result_file, 'test')
+            val = uitvic_caption_eval(config['root'], val_result_file, 'valid')
+            test = uitvic_caption_eval(config['root'], test_result_file, 'test')
             
             if args.evaluate:            
-                log_stats = {**{f'val_{k}': v for k, v in coco_val.eval.items()},
-                             **{f'test_{k}': v for k, v in coco_test.eval.items()},                       
+                log_stats = {**{f'val_{k}': v for k, v in val.items()},
+                             **{f'test_{k}': v for k, v in test.items()},                       
                             }
                 with open(os.path.join(args.output_dir, "evaluate.txt"),"a") as f:
                     f.write(json.dumps(log_stats) + "\n")                   
@@ -170,14 +181,14 @@ def main(args, config):
                     'epoch': epoch,
                 }
 
-                if coco_val.eval['CIDEr'] + coco_val.eval['Bleu_4'] > best:
-                    best = coco_val.eval['CIDEr'] + coco_val.eval['Bleu_4']
+                if val['CIDEr'] + val['Bleu_4'] > best:
+                    best = val['CIDEr'] + val['Bleu_4']
                     best_epoch = epoch                
                     torch.save(save_obj, os.path.join(args.output_dir, 'checkpoint_best.pth')) 
                     
                 log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
-                             **{f'val_{k}': v for k, v in coco_val.eval.items()},
-                             **{f'test_{k}': v for k, v in coco_test.eval.items()},                       
+                             **{f'val_{k}': v for k, v in val.items()},
+                             **{f'test_{k}': v for k, v in test.items()},                       
                              'epoch': epoch,
                              'best_epoch': best_epoch,
                             }
@@ -198,7 +209,7 @@ def main(args, config):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='uitvic')
-    parser.add_argument('--config', default='./configs/uitvic.yaml')
+    parser.add_argument('--config', default='configs/uitvic.yaml')
     parser.add_argument('--output_dir', default='output/caption_uitvic')        
     parser.add_argument('--evaluate', action='store_true')  
     parser.add_argument('--quick_test', action='store_true', help='quick test mode with small dataset')  
@@ -210,13 +221,16 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     yaml = YAML(typ='rt')
-    config = yaml.load(open(args.config, 'r'))
-
+    with open(args.config, 'r', encoding='utf-8') as f:
+        config = yaml.load(f)
+        
     args.result_dir = os.path.join(args.output_dir, 'result')
 
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     Path(args.result_dir).mkdir(parents=True, exist_ok=True)
         
-    yaml.dump(config, open(os.path.join(args.output_dir, 'config.yaml'), 'w'))    
-    
+    # yaml.dump(config, open(os.path.join(args.output_dir, 'config.yaml'), 'w'))    
+    with open(os.path.join(args.output_dir, 'config.yaml'), 'w', encoding='utf-8') as f:
+        yaml.dump(config, f)
+
     main(args, config)

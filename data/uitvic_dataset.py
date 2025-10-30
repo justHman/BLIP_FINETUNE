@@ -6,7 +6,7 @@ import json
 from torch.utils.data import Dataset
 from PIL import Image
 
-from data.utils import pre_caption
+from data.utils import vn_pre_caption
 
 class UITVIC_DATASET(Dataset):
     def __init__(
@@ -111,7 +111,7 @@ class UITVIC_DATASET(Dataset):
             image = self.transform(image)
 
         if self.split == 'train':
-            caption = self.prompt + pre_caption(ann.get('caption', ''), self.max_words)
+            caption = self.prompt + vn_pre_caption(ann.get('caption', ''), self.max_words)
             return image, caption, self.img_ids[ann['image_id']]
 
         else:
@@ -134,10 +134,10 @@ if __name__ == "__main__":
     
     dataset = UITVIC_DATASET(
         transform=transform_train,
-        root="dataset/uitvic_dataset",
+        root=r"dataset/uitvic_dataset",
         split='train',
-        image_dir="dataset/uitvic_dataset/train/train",
-        ann_path="dataset/uitvic_dataset/train_ann.json",
+        image_dir=r"dataset\uitvic_dataset\coco_uitvic_train\coco_uitvic_train",
+        ann_path=r"dataset\uitvic_dataset\uitvic_captions_train2017.json",
         prompt='một bức ảnh về '
     )
     
