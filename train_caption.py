@@ -25,7 +25,7 @@ from models.blip import blip_decoder
 import utils
 from utils import cosine_lr_schedule
 from data import create_dataset, create_sampler, create_loader
-from data.utils import save_result, uitvic_caption_eval, coco_caption_eval
+from data.utils import save_result, uitvic_caption_eval
 
 def train(model, data_loader, optimizer, epoch, device):
     # train
@@ -118,7 +118,7 @@ def main(args, config):
             test_dataset.annotations = test_dataset.annotations[:5]
         print(f"Limited dataset sizes - Train: {len(train_dataset)}, Val: {len(val_dataset)}, Test: {len(test_dataset)}")
 
-        config['max_epoch'] = 1  
+        config['max_epoch'] = 2 
         config['batch_size'] = 2  
 
         print("🚀 QUICK TEST MODE: Overriding config")
@@ -130,9 +130,11 @@ def main(args, config):
                                                           is_trains=[True, False, False], collate_fns=[None,None,None])         
 
     print("Creating model")
-    model = blip_decoder(pretrained=config['pretrained'], image_size=config['image_size'], vit=config['vit'], 
-                           vit_grad_ckpt=config['vit_grad_ckpt'], vit_ckpt_layer=config['vit_ckpt_layer'], 
-                           prompt=config['prompt'])
+    model = blip_decoder(
+        pretrained=config['pretrained'], tokenizer=config['tokenizer'], image_size=config['image_size'], 
+        vit=config['vit'], vit_grad_ckpt=config['vit_grad_ckpt'], vit_ckpt_layer=config['vit_ckpt_layer'], 
+        prompt=config['prompt']
+    )
 
     model = model.to(device)   
     

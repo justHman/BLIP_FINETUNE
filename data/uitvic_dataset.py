@@ -6,15 +6,17 @@ import json
 from torch.utils.data import Dataset
 from PIL import Image
 
-from data.utils import vn_pre_caption
+from data.utils import vn_pre_caption, unaccented_vn_pre_caption
 
 class UITVIC_DATASET(Dataset):
     def __init__(
         self, transform, 
         root, split='train',
         image_dir=None, ann_path=None,
-        max_words=30, prompt='một bức ảnh về '
+        max_words=30, 
+        tokenizer= 'bert-base-uncased', prompt='một bức ảnh về '
     ):
+        self.tokenizer = tokenizer
         self.transform = transform
         self.root = root
         self.split = split
@@ -69,11 +71,6 @@ class UITVIC_DATASET(Dataset):
         """Create COCO-style ground truth files for validation and test splits."""
         gt_file = os.path.join(self.root, f"uitvic_{self.split}_gt.json")
 
-        # Skip if the file already exists
-        if os.path.exists(gt_file):
-            print(f"Ground truth file already exists: {gt_file}")
-            return
-
         # Create COCO-style ground truth
         images = []
         for ann in self.annotations:
@@ -81,13 +78,20 @@ class UITVIC_DATASET(Dataset):
             if {'id': image_id} not in images:
                 images.append({'id': image_id})
 
+        annotations = []
+        for ann in self.annotations:
+            image_id = ann['image_id']
+            id = ann['id']
+            caption = ann['caption']
+            if self.tokenizer == 'bert-base-uncased':
+                caption = unaccented_vn_pre_caption(ann.get('caption', ''), max_words=100)
+            
+            annotations.append({"image_id": image_id, "caption": caption, "id": id})
+
         gt_data = {
             "info": {"description": "UITVIC dataset"},
             "images": images,
-            "annotations": [
-                {"image_id": ann['image_id'], "caption": ann['caption'], "id": ann['id']}
-                for ann in self.annotations
-            ]
+            "annotations": annotations
         }
 
         # Save to file
@@ -111,7 +115,10 @@ class UITVIC_DATASET(Dataset):
             image = self.transform(image)
 
         if self.split == 'train':
-            caption = self.prompt + vn_pre_caption(ann.get('caption', ''), self.max_words)
+            if self.tokenizer == 'bert-base-uncased':
+                caption = self.prompt + unaccented_vn_pre_caption(ann.get('caption', ''), self.max_words)
+            else:
+                caption = self.prompt + vn_pre_caption(ann.get('caption', ''), self.max_words)
             return image, caption, self.img_ids[ann['image_id']]
 
         else:
@@ -138,7 +145,7 @@ if __name__ == "__main__":
         split='train',
         image_dir=r"dataset\uitvic_dataset\coco_uitvic_train\coco_uitvic_train",
         ann_path=r"dataset\uitvic_dataset\uitvic_captions_train2017.json",
-        prompt='một bức ảnh về '
+        prompt='mot buc anh ve ', tokenizer='bert-base-uncased'
     )
     
     print(f"Dataset size: {len(dataset)}")

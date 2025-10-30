@@ -12,9 +12,9 @@ test_ann: "dataset/uitvic_dataset/uitvic_captions_test2017.json"
 # ============== Setup data paths ===================
 
 # set pretrained as a file path or an url
-# pretrained: 'weights/model_base_capfilt_large.pth'
-pretrained: ''
-tokenizer: 
+pretrained: 'weights/model_base_capfilt_large.pth'
+tokenizer: 'bert-base-uncased'
+
 
 # size of vit model; base or large
 vit: 'base'
@@ -30,7 +30,7 @@ max_length: 35
 min_length: 5
 num_beams: 3
 top_p: 0.9
-prompt: 'một bức ảnh về '
+prompt: 'mot buc anh ve '
 
 # optimizer
 weight_decay: 0.05

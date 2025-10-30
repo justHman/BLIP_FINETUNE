@@ -30,19 +30,19 @@ def create_dataset(dataset, config, min_scale=0.5):
             transform=transform_train,
             root=config["root"], split='train',
             image_dir=config.get("train_image_dir", None), ann_path=config.get("train_ann", None),
-            prompt=config.get("prompt", 'một bức ảnh về ')
+            tokenizer=config['tokenizer'], prompt=config.get("prompt", 'một bức ảnh về ')
         )
         test_dataset = UITVIC_DATASET(
             transform=transform_test,
             root=config["root"], split='test',
             image_dir=config.get("test_image_dir", None), ann_path=config.get("test_ann", None),
-            prompt=config.get("prompt", 'một bức ảnh về ')
+            tokenizer=config['tokenizer'], prompt=config.get("prompt", 'một bức ảnh về ')
         )
         val_dataset = UITVIC_DATASET(
             transform=transform_test,
             root=config["root"], split='valid',
             image_dir=config.get("valid_image_dir", None), ann_path=config.get("valid_ann", None),
-            prompt=config.get("prompt", 'một bức ảnh về ')
+            tokenizer=config['tokenizer'], prompt=config.get("prompt", 'một bức ảnh về ')
         )
 
         return train_dataset, val_dataset, test_dataset

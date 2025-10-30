@@ -41,6 +41,7 @@ class BLIP_Base(nn.Module):
         med_config = BertConfig.from_json_file(med_config)
         med_config.encoder_width = vision_width
         self.text_encoder = BertModel(config=med_config, add_pooling_layer=False)  
+        self.text_encoder.resize_token_embeddings(len(self.tokenizer))
 
         
     def forward(self, image, caption, mode):
@@ -64,7 +65,7 @@ class BLIP_Base(nn.Module):
             image_embeds = self.visual_encoder(image)    
             image_atts = torch.ones(image_embeds.size()[:-1],dtype=torch.long).to(image.device)      
             
-            text.input_ids[:,0] = self.tokenizer.enc_token_id
+            text.input_ids[:, 0] = self.tokenizer.enc_token_id
             output = self.text_encoder(text.input_ids,
                                        attention_mask = text.attention_mask,
                                        encoder_hidden_states = image_embeds,
@@ -78,11 +79,12 @@ class BLIP_Base(nn.Module):
 class BLIP_Decoder(nn.Module):
     def __init__(self,                 
                  med_config = 'configs/med_config.json',  
+                 tokenizer='bert-base-uncased',
                  image_size = 384,
                  vit = 'base',
                  vit_grad_ckpt = False,
                  vit_ckpt_layer = 0,
-                 prompt = 'a picture of ',
+                 prompt = 'một bức ảnh về ',
                  ):
         """
         Args:
@@ -93,10 +95,11 @@ class BLIP_Decoder(nn.Module):
         super().__init__()
         
         self.visual_encoder, vision_width = create_vit(vit,image_size, vit_grad_ckpt, vit_ckpt_layer)
-        self.tokenizer = init_tokenizer()   
+        self.tokenizer = init_tokenizer(tokenizer)   
         med_config = BertConfig.from_json_file(med_config)
         med_config.encoder_width = vision_width
         self.text_decoder = BertLMHeadModel(config=med_config)    
+        self.text_decoder.resize_token_embeddings(len(self.tokenizer))
         
         self.prompt = prompt
         self.prompt_length = len(self.tokenizer(self.prompt).input_ids)-1
@@ -130,7 +133,7 @@ class BLIP_Decoder(nn.Module):
 
         if not sample:
             image_embeds = image_embeds.repeat_interleave(num_beams,dim=0)
-            # image_atts = image_atts.repeat_interleave(num_beams, dim=0)
+            image_atts = image_atts.repeat_interleave(num_beams, dim=0)
             
         model_kwargs = {"encoder_hidden_states": image_embeds, "encoder_attention_mask":image_atts}
         
@@ -169,10 +172,10 @@ class BLIP_Decoder(nn.Module):
         return captions
     
 
-def blip_decoder(pretrained='',**kwargs):
+def blip_decoder(pretrained='', **kwargs):
     model = BLIP_Decoder(**kwargs)
     if pretrained:
-        model,msg = load_checkpoint(model,pretrained)
+        model, msg = load_checkpoint(model, pretrained)
         assert(len(msg.missing_keys)==0)
     return model    
     
@@ -183,10 +186,13 @@ def blip_feature_extractor(pretrained='',**kwargs):
         assert(len(msg.missing_keys)==0)
     return model        
 
-def init_tokenizer():
-    # tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    # tokenizer = AutoTokenizer.from_pretrained('vinai/phobert-base')
-    tokenizer = AutoTokenizer.from_pretrained('bert-base-multilingual-uncased')
+def init_tokenizer(tokenizer):
+    if tokenizer == 'vinai/phobert-base':
+        tokenizer = AutoTokenizer.from_pretrained('vinai/phobert-base')
+    if tokenizer == 'bert-base-uncased':
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    elif tokenizer == 'bert-base-multilingual-uncased':
+        tokenizer = AutoTokenizer.from_pretrained('bert-base-multilingual-uncased')
     tokenizer.add_special_tokens({'bos_token':'[DEC]'})
     tokenizer.add_special_tokens({'additional_special_tokens':['[ENC]']})       
     tokenizer.enc_token_id = tokenizer.additional_special_tokens_ids[0]  

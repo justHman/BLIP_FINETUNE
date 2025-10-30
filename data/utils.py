@@ -9,6 +9,7 @@ import utils
 from pycocotools.coco import COCO
 from pycocoevalcap.eval import COCOEvalCap
 from torchvision.datasets.utils import download_url
+import unicodedata
 
 def pre_caption(caption,max_words=50):
     caption = re.sub(
@@ -32,17 +33,9 @@ def pre_caption(caption,max_words=50):
     return caption
 
 def vn_pre_caption(caption, max_words=50):
-    """
-    Preprocess a caption for PhoBERT tokenizer.
-    Args:
-        caption (str): The input caption.
-        max_words (int): Maximum number of words to keep.
-    Returns:
-        str: The processed caption.
-    """
     # Loại bỏ các ký tự không cần thiết, giữ lại dấu tiếng Việt
     caption = re.sub(
-        r"([\"()*#:;~])",  # Loại bỏ các ký tự không cần thiết (trừ dấu câu tiếng Việt)
+        r"([.!\"()*#:;~])",  # Loại bỏ các ký tự không cần thiết
         ' ',
         caption.lower(),
     )
@@ -53,6 +46,36 @@ def vn_pre_caption(caption, max_words=50):
     )
     caption = caption.rstrip('\n')  # Loại bỏ ký tự xuống dòng
     caption = caption.strip(' ')  # Loại bỏ khoảng trắng ở đầu và cuối
+
+    # Cắt ngắn caption nếu vượt quá số từ tối đa
+    caption_words = caption.split(' ')
+    if len(caption_words) > max_words:
+        caption = ' '.join(caption_words[:max_words])
+
+    return caption
+
+def unaccented_vn_pre_caption(caption, max_words=50):
+    caption = re.sub(
+        r"([.!\"()*#:;~])",  # Loại bỏ các ký tự không cần thiết
+        ' ',
+        caption.lower(),
+    )
+    caption = re.sub(
+        r"\s{2,}",  # Loại bỏ khoảng trắng thừa
+        ' ',
+        caption,
+    )
+    caption = caption.rstrip('\n')  # Loại bỏ ký tự xuống dòng
+    caption = caption.strip(' ')  # Loại bỏ khoảng trắng ở đầu và cuối
+
+    # Loại bỏ dấu tiếng Việt và chuyển đổi 'đ' thành 'd'
+    def remove_accent_and_convert_d(text):
+        text = unicodedata.normalize('NFD', text)
+        text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')  # Loại bỏ dấu
+        text = text.replace('đ', 'd')  # Chuyển đổi 'đ' thành 'd'
+        return text
+
+    caption = remove_accent_and_convert_d(caption)
 
     # Cắt ngắn caption nếu vượt quá số từ tối đa
     caption_words = caption.split(' ')
@@ -230,3 +253,13 @@ def uitvic_caption_eval(gt_root_file, results_file, split):
         'ROUGE_L': rouge_scores,
         'CIDEr': cider_scores
     }
+
+if __name__ == "__main__":
+    caption = "Một bức ảnh về con mèo đáng yêu!"
+    processed_pre_caption = pre_caption(caption, max_words=20)
+    processed_vn_pre_caption = vn_pre_caption(caption, max_words=20)
+    processed_unaccented_vn_pre_caption = unaccented_vn_pre_caption(caption, max_words=20)
+    print("Pre Caption:", processed_pre_caption)
+    print("VN Pre Caption:", processed_vn_pre_caption)
+    print("Unaccented VN Pre Caption:", processed_unaccented_vn_pre_caption)
+    
