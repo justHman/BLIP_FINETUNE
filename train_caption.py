@@ -62,7 +62,7 @@ def evaluate(model, data_loader, device, config):
     model.eval() 
     
     metric_logger = utils.MetricLogger(delimiter="  ")
-    header = 'Caption generation:'
+    header = '--Caption generation:'
     print_freq = 10
 
     result = []
@@ -70,14 +70,17 @@ def evaluate(model, data_loader, device, config):
         
         image = image.to(device)       
         
-        # captions = model.generate(
-        #   image, sample=False, num_beams=config['num_beams'], 
-        #   max_length=config['max_length'], min_length=config['min_length'])
-        
-        captions = model.generate(
-            image, sample=True, top_p=config['top_p'], 
-            max_length=config['max_length'], min_length=config['min_length']
-        )
+        if config["sample"]:
+            print("--Using nucleus sampling!")
+            captions = model.generate(
+                image, sample=config["sample"], top_p=config['top_p'], 
+                max_length=config['max_length'], min_length=config['min_length']
+            )
+        else:  
+            print("--Using beam search!")
+            captions = model.generate(
+              image, sample=config["sample"], num_beams=config['num_beams'], 
+              max_length=config['max_length'], min_length=config['min_length'])
 
         for caption, img_id in zip(captions, image_id):
             result.append({"image_id": img_id.item(), "caption": caption})
@@ -98,7 +101,7 @@ def main(args, config):
     cudnn.benchmark = True
 
     #### Dataset #### 
-    print("Creating captioning dataset")
+    print("--Creating captioning dataset")
     train_dataset, val_dataset, test_dataset = create_dataset(args.dataset, config)  
 
     if args.distributed:
@@ -109,21 +112,20 @@ def main(args, config):
         samplers = [None, None, None]
 
     if hasattr(args, 'quick_test') and args.quick_test:
-        print("🚀 QUICK TEST MODE: Using only 10 samples for training!")
+        print("--QUICK TEST MODE: Using only 10 samples for training!")
         if len(train_dataset) > 10:
             train_dataset.annotations = train_dataset.annotations[:10]
         if len(val_dataset) > 5:
             val_dataset.annotations = val_dataset.annotations[:5]
         if len(test_dataset) > 5:
             test_dataset.annotations = test_dataset.annotations[:5]
-        print(f"Limited dataset sizes - Train: {len(train_dataset)}, Val: {len(val_dataset)}, Test: {len(test_dataset)}")
+        print(f"\t+ Limited dataset sizes - Train: {len(train_dataset)}, Val: {len(val_dataset)}, Test: {len(test_dataset)}")
 
         config['max_epoch'] = 2 
         config['batch_size'] = 2  
 
-        print("🚀 QUICK TEST MODE: Overriding config")
-        print(f"- max_epoch: {config['max_epoch']}")
-        print(f"- batch_size: {config['batch_size']}")
+        print(f"\t+ max_epoch: {config['max_epoch']}")
+        print(f"\t+ batch_size: {config['batch_size']}")
 
     train_loader, val_loader, test_loader = create_loader([train_dataset, val_dataset, test_dataset],samplers,
                                                           batch_size=[config['batch_size']]*3,num_workers=[4,4,4],
@@ -148,7 +150,7 @@ def main(args, config):
     best = 0
     best_epoch = 0
 
-    print("Start training")
+    print("--Start training")
     start_time = time.time()    
     for epoch in range(0, config['max_epoch']):
         if not args.evaluate:        

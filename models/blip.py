@@ -23,6 +23,7 @@ from timm.models.hub import download_cached_file
 class BLIP_Base(nn.Module):
     def __init__(self,                 
                  med_config = 'configs/med_config.json',  
+                 tokenizer = 'bert-base-uncased',
                  image_size = 224,
                  vit = 'base',
                  vit_grad_ckpt = False,
@@ -37,7 +38,7 @@ class BLIP_Base(nn.Module):
         super().__init__()
         
         self.visual_encoder, vision_width = create_vit(vit,image_size, vit_grad_ckpt, vit_ckpt_layer)
-        self.tokenizer = init_tokenizer()   
+        self.tokenizer = init_tokenizer(tokenizer)   
         med_config = BertConfig.from_json_file(med_config)
         med_config.encoder_width = vision_width
         self.text_encoder = BertModel(config=med_config, add_pooling_layer=False)  
@@ -176,7 +177,9 @@ def blip_decoder(pretrained='', **kwargs):
     model = BLIP_Decoder(**kwargs)
     if pretrained:
         model, msg = load_checkpoint(model, pretrained)
-        assert(len(msg.missing_keys)==0)
+        # print(f"Missing keys: {msg.missing_keys}")
+        # Bỏ qua kiểm tra missing_keys
+        assert(len(msg.missing_keys)==0)  # Comment out this line
     return model    
     
 def blip_feature_extractor(pretrained='',**kwargs):
@@ -188,15 +191,20 @@ def blip_feature_extractor(pretrained='',**kwargs):
 
 def init_tokenizer(tokenizer):
     if tokenizer == 'vinai/phobert-base':
-        tokenizer = AutoTokenizer.from_pretrained('vinai/phobert-base')
+        print("--Using PhoBERT tokenizer")
+        tokenizer_obj = AutoTokenizer.from_pretrained('vinai/phobert-base')
     if tokenizer == 'bert-base-uncased':
-        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        print("--Using BERT tokenizer")
+        tokenizer_obj = BertTokenizer.from_pretrained('bert-base-uncased')
     elif tokenizer == 'bert-base-multilingual-uncased':
-        tokenizer = AutoTokenizer.from_pretrained('bert-base-multilingual-uncased')
-    tokenizer.add_special_tokens({'bos_token':'[DEC]'})
-    tokenizer.add_special_tokens({'additional_special_tokens':['[ENC]']})       
-    tokenizer.enc_token_id = tokenizer.additional_special_tokens_ids[0]  
-    return tokenizer
+        print("--Using Multilingual BERT tokenizer")
+        tokenizer_obj = AutoTokenizer.from_pretrained('bert-base-multilingual-uncased')
+    
+    if tokenizer in ['bert-base-uncased', 'bert-base-multilingual-uncased']:
+        tokenizer_obj.add_special_tokens({'bos_token':'[DEC]'})
+    tokenizer_obj.add_special_tokens({'additional_special_tokens':['[ENC]']})       
+    tokenizer_obj.enc_token_id = tokenizer_obj.additional_special_tokens_ids[0]  
+    return tokenizer_obj
 
 
 def create_vit(vit, image_size, use_grad_checkpointing=False, ckpt_layer=0, drop_path_rate=0):
@@ -241,6 +249,6 @@ def load_checkpoint(model, url_or_filename):
                 del state_dict[key]
     
     msg = model.load_state_dict(state_dict, strict=False)
-    print('load checkpoint from %s'%url_or_filename)  
-    return model,msg
+    print('--Load checkpoint from %s'%url_or_filename)  
+    return model, msg
     

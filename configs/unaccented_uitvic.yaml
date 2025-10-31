@@ -30,6 +30,7 @@ max_length: 35
 min_length: 5
 num_beams: 3
 top_p: 0.9
+sample: False
 prompt: 'mot buc anh ve '
 
 # optimizer

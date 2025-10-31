@@ -14,7 +14,7 @@ test_ann: "dataset/uitvic_dataset/uitvic_captions_test2017.json"
 # set pretrained as a file path or an url
 # pretrained: 'weights/model_base_capfilt_large.pth'
 pretrained: ''
-tokenizer: 
+tokenizer: "vinai/phobert-base"
 
 # size of vit model; base or large
 vit: 'base'
@@ -29,6 +29,7 @@ image_size: 384
 max_length: 35  
 min_length: 5
 num_beams: 3
+sample: False
 top_p: 0.9
 prompt: 'một bức ảnh về '
 
