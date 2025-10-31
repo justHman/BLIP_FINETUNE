@@ -64,6 +64,11 @@ def evaluate(model, data_loader, device, config):
     metric_logger = utils.MetricLogger(delimiter="  ")
     header = '--Caption generation:'
     print_freq = 10
+    
+    if config["sample"]:
+        print("--Using nucleus sampling!")
+    else:  
+        print("--Using beam search!")
 
     result = []
     for image, image_id in metric_logger.log_every(data_loader, print_freq, header): 
@@ -71,13 +76,11 @@ def evaluate(model, data_loader, device, config):
         image = image.to(device)       
         
         if config["sample"]:
-            print("--Using nucleus sampling!")
             captions = model.generate(
                 image, sample=config["sample"], top_p=config['top_p'], 
                 max_length=config['max_length'], min_length=config['min_length']
             )
-        else:  
-            print("--Using beam search!")
+        else:
             captions = model.generate(
               image, sample=config["sample"], num_beams=config['num_beams'], 
               max_length=config['max_length'], min_length=config['min_length'])
