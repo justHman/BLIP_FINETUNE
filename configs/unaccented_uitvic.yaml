@@ -12,7 +12,7 @@ test_ann: "dataset/uitvic_dataset/uitvic_captions_test2017.json"
 # ============== Setup data paths ===================
 
 # set pretrained as a file path or an url
-pretrained: 'weights/model_base_capfilt_large.pth'
+pretrained: 'weights\unaccented_20e.pth'
 tokenizer: 'bert-base-uncased'
 
 
