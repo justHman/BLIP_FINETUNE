@@ -1,10 +1,14 @@
+import os 
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.transforms.functional import InterpolationMode
 
 from data.coco_karpathy_dataset import coco_karpathy_train, coco_karpathy_caption_eval, coco_karpathy_retrieval_eval
-from data.uitvic_dataset import UITVIC_DATASET
+from data.vic_dataset import UITVIC_DATASET, KTVIC_DATASET
 from transform.randaugment import RandomAugment
 
 def create_dataset(dataset, config, min_scale=0.5):
@@ -27,26 +31,50 @@ def create_dataset(dataset, config, min_scale=0.5):
     
     if dataset.lower() == 'uitvic':
         train_dataset = UITVIC_DATASET(
-            transform=transform_train,
+            dataset, transform=transform_train,
             root=config["root"], split='train',
             image_dir=config.get("train_image_dir", None), ann_path=config.get("train_ann", None),
             tokenizer=config['tokenizer'], prompt=config.get("prompt", 'một bức ảnh về ')
         )
         test_dataset = UITVIC_DATASET(
-            transform=transform_test,
+            dataset, transform=transform_test,
             root=config["root"], split='test',
             image_dir=config.get("test_image_dir", None), ann_path=config.get("test_ann", None),
             tokenizer=config['tokenizer'], prompt=config.get("prompt", 'một bức ảnh về ')
         )
         val_dataset = UITVIC_DATASET(
-            transform=transform_test,
+            dataset, transform=transform_test,
             root=config["root"], split='valid',
             image_dir=config.get("valid_image_dir", None), ann_path=config.get("valid_ann", None),
             tokenizer=config['tokenizer'], prompt=config.get("prompt", 'một bức ảnh về ')
         )
 
         return train_dataset, val_dataset, test_dataset
-                                       
+
+    elif dataset == 'ktvic':
+        train_dataset = KTVIC_DATASET(
+            dataset=dataset,
+            transform=transform_train,
+            root=config["root"], split='train',
+            image_dir=config.get("train_image_dir", None), ann_path=config.get("train_ann", None),
+            tokenizer=config['tokenizer'], prompt=config.get("prompt", 'một bức ảnh về ')
+        )
+        val_dataset = KTVIC_DATASET(
+            dataset=dataset,
+            transform=transform_train,
+            root=config["root"], split='valid',
+            image_dir=config.get("valid_image_dir", None), ann_path=config.get("valid_ann", None),
+            tokenizer=config['tokenizer'], prompt=config.get("prompt", 'một bức ảnh về ')
+        )
+        test_dataset = KTVIC_DATASET(
+            dataset=dataset,
+            transform=transform_train,
+            root=config["root"], split='test',
+            image_dir=config.get("test_image_dir", None), ann_path=config.get("test_ann", None),
+            tokenizer=config['tokenizer'], prompt=config.get("prompt", 'một bức ảnh về ')
+        )
+        return train_dataset, val_dataset, test_dataset
+    
     elif dataset=='caption_coco':   
         train_dataset = coco_karpathy_train(transform_train, config['image_root'], config['ann_root'], prompt=config['prompt'])
         val_dataset = coco_karpathy_caption_eval(transform_test, config['image_root'], config['ann_root'], 'val')

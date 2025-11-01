@@ -1,4 +1,5 @@
 import re
+
 import json
 import os
 from collections import defaultdict, Counter
@@ -145,11 +146,11 @@ def coco_caption_eval(gt_root_file, results_file, split):
     
     return coco_eval
 
-def uitvic_caption_eval(gt_root_file, results_file, split):
+def caption_eval(gt_root_file, results_file, dataset, split):
     if split not in ['valid', 'test']:
         raise ValueError("split must be either 'valid' or 'test'")
     
-    gt_root_file = os.path.join(gt_root_file, f'uitvic_{split}_gt.json')
+    gt_root_file = os.path.join(gt_root_file, f'{dataset}_{split}_gt.json')
 
     # Load ground truth and results
     with open(gt_root_file, 'r', encoding='utf-8') as f:
@@ -253,7 +254,7 @@ def uitvic_caption_eval(gt_root_file, results_file, split):
         'ROUGE_L': rouge_scores,
         'CIDEr': cider_scores
     }
-
+    
 if __name__ == "__main__":
     caption = "Một bức ảnh về con mèo đáng yêu!"
     processed_pre_caption = pre_caption(caption, max_words=20)

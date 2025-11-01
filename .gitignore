@@ -1,4 +1,4 @@
-dataset/uitvic_dataset
+dataset/
 output/caption_uitvic
 weights/
 **/__pycache__/

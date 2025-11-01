@@ -25,7 +25,7 @@ from models.blip import blip_decoder
 import utils
 from utils import cosine_lr_schedule
 from data import create_dataset, create_sampler, create_loader
-from data.utils import save_result, uitvic_caption_eval
+from data.utils import save_result, caption_eval
 
 def train(model, data_loader, optimizer, epoch, device):
     # train
@@ -124,7 +124,7 @@ def main(args, config):
             test_dataset.annotations = test_dataset.annotations[:5]
         print(f"\t+ Limited dataset sizes - Train: {len(train_dataset)}, Val: {len(val_dataset)}, Test: {len(test_dataset)}")
 
-        config['max_epoch'] = 2 
+        config['max_epoch'] = 1 
         config['batch_size'] = 2  
 
         print(f"\t+ max_epoch: {config['max_epoch']}")
@@ -167,16 +167,16 @@ def main(args, config):
         val_result = evaluate(model_without_ddp, val_loader, device, config)  
         val_result_file = save_result(val_result, args.result_dir, args.distributed, 'val_epoch%d'%epoch, remove_duplicate='image_id')        
   
-        test_result = evaluate(model_without_ddp, test_loader, device, config)  
-        test_result_file = save_result(test_result, args.result_dir, args.distributed, 'test_epoch%d'%epoch, remove_duplicate='image_id')  
+        # test_result = evaluate(model_without_ddp, test_loader, device, config)  
+        # test_result_file = save_result(test_result, args.result_dir, args.distributed, 'test_epoch%d'%epoch, remove_duplicate='image_id')  
 
         if utils.is_main_process():   
-            val = uitvic_caption_eval(config['root'], val_result_file, 'valid')
-            test = uitvic_caption_eval(config['root'], test_result_file, 'test')
+            val = caption_eval(config['root'], val_result_file, args.dataset, 'valid')
+            # test = caption_eval(config['root'], test_result_file, args.dataset, 'test')
             
             if args.evaluate:            
                 log_stats = {**{f'val_{k}': v for k, v in val.items()},
-                             **{f'test_{k}': v for k, v in test.items()},                       
+                            #  **{f'test_{k}': v for k, v in test.items()},                       
                             }
                 with open(os.path.join(args.output_dir, "evaluate.txt"),"a") as f:
                     f.write(json.dumps(log_stats) + "\n")                   
@@ -195,7 +195,7 @@ def main(args, config):
                     
                 log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                              **{f'val_{k}': v for k, v in val.items()},
-                             **{f'test_{k}': v for k, v in test.items()},                       
+                            #  **{f'test_{k}': v for k, v in test.items()},                       
                              'epoch': epoch,
                              'best_epoch': best_epoch,
                             }
@@ -239,5 +239,8 @@ if __name__ == '__main__':
     # yaml.dump(config, open(os.path.join(args.output_dir, 'config.yaml'), 'w'))    
     with open(os.path.join(args.output_dir, 'config.yaml'), 'w', encoding='utf-8') as f:
         yaml.dump(config, f)
+    print("--Config:")
+    for k,v in config.items():
+        print(f"\t{k}: {v}")
 
     main(args, config)

@@ -1,0 +1,38 @@
+# ============== Setup data paths ===================
+root: dataset/ktvic_dataset
+
+train_image_dir: dataset/ktvic_dataset/train-images
+train_ann: dataset/ktvic_dataset/train_data.json
+
+valid_image_dir: dataset/ktvic_dataset/public-test-images
+valid_ann: dataset/ktvic_dataset/test_data.json
+
+test_image_dir: dataset/ktvic_dataset/public-test-images
+test_ann: dataset/ktvic_dataset/test_data.json
+# ============== Setup data paths ===================
+
+# set pretrained as a file path or an url
+pretrained: weights\model_base_capfilt_large.pth
+tokenizer: bert-base-uncased
+
+# size of vit model; base or large
+vit: base
+vit_grad_ckpt: false
+vit_ckpt_layer: 0
+
+# optimizer
+weight_decay: 0.05
+min_lr: 0
+init_lr: 1e-5
+
+# generation configs
+max_length: 35
+min_length: 5
+num_beams: 3
+top_p: 0.9
+sample: false
+
+image_size: 384
+batch_size: 16
+max_epoch: 20
+prompt: 'mot buc anh ve '

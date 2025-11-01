@@ -1,20 +1,19 @@
 # ============== Setup data paths ===================
-root: "dataset/uitvic_dataset"
+root: "dataset/ktvic_dataset"
 
-train_image_dir: "dataset/uitvic_dataset/coco_uitvic_train/coco_uitvic_train"
-train_ann: "dataset/uitvic_dataset/uitvic_captions_train2017.json"
+train_image_dir: "dataset/ktvic_dataset/train-images"
+train_ann: "dataset/ktvic_dataset/train_data.json"
 
-valid_image_dir: "dataset/uitvic_dataset/coco_uitvic_test/coco_uitvic_test"
-valid_ann: "dataset/uitvic_dataset/uitvic_captions_test2017.json"
+valid_image_dir: "dataset/ktvic_dataset/public-test-images"
+valid_ann: "dataset/ktvic_dataset/test_data.json"
 
-test_image_dir: "dataset/uitvic_dataset/coco_uitvic_test/coco_uitvic_test"
-test_ann: "dataset/uitvic_dataset/uitvic_captions_test2017.json"
+test_image_dir: "dataset/ktvic_dataset/public-test-images"
+test_ann: "dataset/ktvic_dataset/test_data.json"
 # ============== Setup data paths ===================
 
 # set pretrained as a file path or an url
 pretrained: 'weights\model_base_capfilt_large.pth'
 tokenizer: 'bert-base-uncased'
-
 
 # size of vit model; base or large
 vit: 'base'
@@ -34,6 +33,6 @@ top_p: 0.9
 sample: False
 
 image_size: 384  
-prompt: 'mot buc anh ve '
 batch_size: 16
 max_epoch: 20
+prompt: 'mot buc anh ve '

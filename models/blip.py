@@ -193,7 +193,7 @@ def init_tokenizer(tokenizer):
     if tokenizer == 'vinai/phobert-base':
         print("--Using PhoBERT tokenizer")
         tokenizer_obj = AutoTokenizer.from_pretrained('vinai/phobert-base')
-    if tokenizer == 'bert-base-uncased':
+    elif tokenizer == 'bert-base-uncased':
         print("--Using BERT tokenizer")
         tokenizer_obj = BertTokenizer.from_pretrained('bert-base-uncased')
     elif tokenizer == 'bert-base-multilingual-uncased':
