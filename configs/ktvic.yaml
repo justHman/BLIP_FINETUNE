@@ -1,14 +1,14 @@
 # ============== Setup data paths ===================
-root: "dataset/ktvic_dataset"
+root: "dataset/ktvic-dataset"
 
-train_image_dir: "dataset/ktvic_dataset/train-images"
-train_ann: "dataset/ktvic_dataset/train_data.json"
+train_image_dir: "dataset/ktvic-dataset/train-images"
+train_ann: "dataset/ktvic-dataset/train_data.json"
 
-valid_image_dir: "dataset/ktvic_dataset/public-test-images"
-valid_ann: "dataset/ktvic_dataset/test_data.json"
+valid_image_dir: "dataset/ktvic-dataset/public-test-images"
+valid_ann: "dataset/ktvic-dataset/test_data.json"
 
-test_image_dir: "dataset/ktvic_dataset/public-test-images"
-test_ann: "dataset/ktvic_dataset/test_data.json"
+test_image_dir: "dataset/ktvic-dataset/public-test-images"
+test_ann: "dataset/ktvic-dataset/test_data.json"
 # ============== Setup data paths ===================
 
 # set pretrained as a file path or an url
