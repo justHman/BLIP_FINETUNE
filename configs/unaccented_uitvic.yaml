@@ -1,14 +1,14 @@
 # ============== Setup data paths ===================
-root: "dataset/uitvic-dataset"
+root: "dataset/uitvic_dataset"
 
-train_image_dir: "dataset/uitvic-dataset/coco_uitvic_train/coco_uitvic_train"
-train_ann: "dataset/uitvic-dataset/uitvic_captions_train2017.json"
+train_image_dir: "dataset/uitvic_dataset/coco_uitvic_train/coco_uitvic_train"
+train_ann: "dataset/uitvic_dataset/uitvic_captions_train2017.json"
 
-valid_image_dir: "dataset/uitvic-dataset/coco_uitvic_test/coco_uitvic_test"
-valid_ann: "dataset/uitvic-dataset/uitvic_captions_test2017.json"
+valid_image_dir: "dataset/uitvic_dataset/coco_uitvic_test/coco_uitvic_test"
+valid_ann: "dataset/uitvic_dataset/uitvic_captions_test2017.json"
 
-test_image_dir: "dataset/uitvic-dataset/coco_uitvic_test/coco_uitvic_test"
-test_ann: "dataset/uitvic-dataset/uitvic_captions_test2017.json"
+test_image_dir: "dataset/uitvic_dataset/coco_uitvic_test/coco_uitvic_test"
+test_ann: "dataset/uitvic_dataset/uitvic_captions_test2017.json"
 # ============== Setup data paths ===================
 
 # set pretrained as a file path or an url
