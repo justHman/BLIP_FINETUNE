@@ -195,10 +195,10 @@ def main(args, config):
                 if score > best:
                     best = score
                     best_epoch = epoch     
-                    model_path = os.path.join(args.output_dir, 'best_checkpoint_epoch_%d.pth'%epoch)           
-                    torch.save(save_obj, model_path) 
+                    model_path = os.path.join(args.output_dir, 'best_checkpoint_epoch_%d.pth'%epoch)     
                     print(f"==> Best checkpoint saved at: {model_path}")
-                    print(f"Epoch: {best_epoch} - CIDEr: {val['CIDEr']:.2f} + Bleu_4: {val['Bleu_4']:.2f} = {best:.2f}")
+                    print(f"Epoch: {best_epoch} - CIDEr: {val['CIDEr']:.2f} + Bleu_4: {val['Bleu_4']:.2f} = {best:.2f}")      
+                    torch.save(save_obj, model_path) 
                     
                 log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                              **{f'val_{k}': v for k, v in val.items()},
