@@ -167,7 +167,7 @@ def main(args, config):
         val_result = evaluate(model_without_ddp, val_loader, device, config)  
         val_result_file = save_result(val_result, args.result_dir, args.distributed, 'val_epoch%d'%epoch, remove_duplicate='image_id')        
 
-        if not args.evaluate:
+        if args.evaluate:
             test_result = evaluate(model_without_ddp, test_loader, device, config)  
             test_result_file = save_result(test_result, args.result_dir, args.distributed, 'test_epoch%d'%epoch, remove_duplicate='image_id')  
 
