@@ -124,7 +124,7 @@ def main(args, config):
             test_dataset.annotations = test_dataset.annotations[:5]
         print(f"\t+ Limited dataset sizes - Train: {len(train_dataset)}, Val: {len(val_dataset)}, Test: {len(test_dataset)}")
 
-        config['max_epoch'] = 1 
+        config['max_epoch'] = 2 
         config['batch_size'] = 2  
 
         print(f"\t+ max_epoch: {config['max_epoch']}")
@@ -190,8 +190,10 @@ def main(args, config):
                     'epoch': epoch,
                 }
 
-                if val['CIDEr'] + val['Bleu_4'] > best:
-                    best = val['CIDEr'] + val['Bleu_4']
+                score = val['CIDEr'] + val['Bleu_4']
+                print(f"Current Score: {score:.2f} - Best Score: {best:.2f}")
+                if score > best:
+                    best = score
                     best_epoch = epoch     
                     model_path = os.path.join(args.output_dir, 'best_checkpoint_epoch_%d.pth'%epoch)           
                     torch.save(save_obj, os.path.join(args.output_dir, model_path)) 
