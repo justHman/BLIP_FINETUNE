@@ -166,18 +166,20 @@ def main(args, config):
         
         val_result = evaluate(model_without_ddp, val_loader, device, config)  
         val_result_file = save_result(val_result, args.result_dir, args.distributed, 'val_epoch%d'%epoch, remove_duplicate='image_id')        
-  
-        # test_result = evaluate(model_without_ddp, test_loader, device, config)  
-        # test_result_file = save_result(test_result, args.result_dir, args.distributed, 'test_epoch%d'%epoch, remove_duplicate='image_id')  
+
+        if not args.evaluate:
+            test_result = evaluate(model_without_ddp, test_loader, device, config)  
+            test_result_file = save_result(test_result, args.result_dir, args.distributed, 'test_epoch%d'%epoch, remove_duplicate='image_id')  
 
         if utils.is_main_process():   
             val = caption_eval(config['root'], val_result_file, args.dataset, 'valid')
-            # test = caption_eval(config['root'], test_result_file, args.dataset, 'test')
             
-            if args.evaluate:            
-                log_stats = {**{f'val_{k}': v for k, v in val.items()},
-                            #  **{f'test_{k}': v for k, v in test.items()},                       
-                            }
+            if args.evaluate:      
+                test = caption_eval(config['root'], test_result_file, args.dataset, 'test')      
+                log_stats = {
+                    # **{f'val_{k}': v for k, v in val.items()},
+                    **{f'test_{k}': v for k, v in test.items()},                       
+                }
                 with open(os.path.join(args.output_dir, "evaluate.txt"),"a") as f:
                     f.write(json.dumps(log_stats) + "\n")                   
             else:             
@@ -190,8 +192,11 @@ def main(args, config):
 
                 if val['CIDEr'] + val['Bleu_4'] > best:
                     best = val['CIDEr'] + val['Bleu_4']
-                    best_epoch = epoch                
-                    torch.save(save_obj, os.path.join(args.output_dir, 'checkpoint_best.pth')) 
+                    best_epoch = epoch     
+                    model_path = os.path.join(args.output_dir, 'best_checkpoint_epoch_%d.pth'%epoch)           
+                    torch.save(save_obj, os.path.join(args.output_dir, model_path)) 
+                    print(f"==> Best checkpoint saved at: {model_path}")
+                    print(f"Epoch: {best_epoch} - CIDEr: {val['CIDEr']:.2f} + Bleu_4: {val['Bleu_4']:.2f} = {best:.2f}")
                     
                 log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                              **{f'val_{k}': v for k, v in val.items()},
