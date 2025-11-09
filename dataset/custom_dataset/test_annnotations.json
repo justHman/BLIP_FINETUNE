@@ -1,0 +1,26 @@
+{
+ "images": [
+  {
+   "id": 205086,
+   "filename": "205086.png"
+  },
+  {
+   "id": 304473,
+   "filename": "304473.png"
+  }
+],
+ "annotations": [
+  {
+   "id": 0,
+   "image_id": 205086,
+   "caption": "đây là khung cảnh xuất hiện ở phía trước một căn nhà",
+   "segment_caption": "đây là khung_cảnh xuất_hiện ở phía trước một căn nhà"
+  },
+  {
+   "id": 1,
+   "image_id": 304473,
+   "caption": "có một căn nhà cao tầng xuất hiện ở trong bức ảnh",
+   "segment_caption": "có một căn nhà cao_tầng xuất_hiện ở trong bức ảnh"
+  }
+]
+}

@@ -106,6 +106,8 @@ def main(args, config):
     #### Dataset #### 
     print("--Creating captioning dataset")
     train_dataset, val_dataset, test_dataset = create_dataset(args.dataset, config)  
+    if train_dataset is None:
+        raise ValueError(f"Training dataset is None for dataset {args.dataset}. Please check the dataset paths.")
 
     if args.distributed:
         num_tasks = utils.get_world_size()
@@ -116,11 +118,11 @@ def main(args, config):
 
     if hasattr(args, 'quick_test') and args.quick_test:
         print("--QUICK TEST MODE: Using only 10 samples for training!")
-        if len(train_dataset) > 10:
+        if train_dataset and len(train_dataset) > 10:
             train_dataset.annotations = train_dataset.annotations[:10]
-        if len(val_dataset) > 5:
+        if val_dataset and len(val_dataset) > 5:
             val_dataset.annotations = val_dataset.annotations[:5]
-        if len(test_dataset) > 5:
+        if test_dataset and len(test_dataset) > 5:
             test_dataset.annotations = test_dataset.annotations[:5]
         print(f"\t+ Limited dataset sizes - Train: {len(train_dataset)}, Val: {len(val_dataset)}, Test: {len(test_dataset)}")
 
@@ -163,11 +165,12 @@ def main(args, config):
             cosine_lr_schedule(optimizer, epoch, config['max_epoch'], config['init_lr'], config['min_lr'])
                 
             train_stats = train(model, train_loader, optimizer, epoch, device) 
-        
-        val_result = evaluate(model_without_ddp, val_loader, device, config)  
-        val_result_file = save_result(val_result, args.result_dir, args.distributed, 'val_epoch%d'%epoch, remove_duplicate='image_id')        
 
-        if args.evaluate:
+        if val_loader is not None:
+            val_result = evaluate(model_without_ddp, val_loader, device, config)  
+            val_result_file = save_result(val_result, args.result_dir, args.distributed, 'val_epoch%d'%epoch, remove_duplicate='image_id')        
+
+        if args.evaluate and test_loader is not None:
             test_result = evaluate(model_without_ddp, test_loader, device, config)  
             test_result_file = save_result(test_result, args.result_dir, args.distributed, 'test_epoch%d'%epoch, remove_duplicate='image_id')  
 
@@ -222,9 +225,9 @@ def main(args, config):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', default='uitvic')
-    parser.add_argument('--config', default='configs/uitvic.yaml')
-    parser.add_argument('--output_dir', default='output/caption_uitvic')        
+    parser.add_argument('--dataset', default='custom')
+    parser.add_argument('--config', default='configs/custom.yaml')
+    parser.add_argument('--output_dir', default='output/custom')        
     parser.add_argument('--evaluate', action='store_true')  
     parser.add_argument('--quick_test', action='store_true', help='quick test mode with small dataset')  
     parser.add_argument('--device', default='cpu')

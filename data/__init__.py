@@ -8,7 +8,7 @@ from torchvision import transforms
 from torchvision.transforms.functional import InterpolationMode
 
 from data.coco_karpathy_dataset import coco_karpathy_train, coco_karpathy_caption_eval, coco_karpathy_retrieval_eval
-from data.vic_dataset import UITVIC_DATASET, KTVIC_DATASET
+from data.vic_dataset import UITVIC_DATASET, KTVIC_DATASET, CUSTOM_DATASET
 from transform.randaugment import RandomAugment
 
 def create_dataset(dataset, config, min_scale=0.5):
@@ -75,6 +75,30 @@ def create_dataset(dataset, config, min_scale=0.5):
         )
         return train_dataset, val_dataset, test_dataset
     
+    elif dataset == 'custom':
+        train_dataset = CUSTOM_DATASET(
+            dataset=dataset,
+            transform=transform_train,
+            root=config["root"], split='train',
+            image_dir=config.get("train_image_dir", None), ann_path=config.get("train_ann", None),
+            tokenizer=config['tokenizer'], prompt=config.get("prompt", 'mot buc anh ve ')
+        )
+        val_dataset = CUSTOM_DATASET(
+            dataset=dataset,
+            transform=transform_train,
+            root=config["root"], split='valid',
+            image_dir=config.get("valid_image_dir", None), ann_path=config.get("valid_ann", None),
+            tokenizer=config['tokenizer'], prompt=config.get("prompt", 'mot buc anh ve ')
+        )
+        test_dataset = CUSTOM_DATASET(
+            dataset=dataset,
+            transform=transform_train,
+            root=config["root"], split='test',
+            image_dir=config.get("test_image_dir", None), ann_path=config.get("test_ann", None),
+            tokenizer=config['tokenizer'], prompt=config.get("prompt", 'mot buc anh ve ')
+        )
+        return train_dataset, val_dataset, test_dataset
+    
     elif dataset=='caption_coco':   
         train_dataset = coco_karpathy_train(transform_train, config['image_root'], config['ann_root'], prompt=config['prompt'])
         val_dataset = coco_karpathy_caption_eval(transform_test, config['image_root'], config['ann_root'], 'val')
@@ -88,19 +112,58 @@ def create_dataset(dataset, config, min_scale=0.5):
         return train_dataset, val_dataset, test_dataset 
     
     
+# def create_sampler(datasets, shuffles, num_tasks, global_rank):
+#     samplers = []
+#     for dataset,shuffle in zip(datasets,shuffles):
+#         sampler = torch.utils.data.DistributedSampler(dataset, num_replicas=num_tasks, rank=global_rank, shuffle=shuffle)
+#         samplers.append(sampler)
+#     return samplers     
+
+
+# def create_loader(datasets, samplers, batch_size, num_workers, is_trains, collate_fns):
+#     loaders = []
+#     for dataset,sampler,bs,n_worker,is_train,collate_fn in zip(datasets,samplers,batch_size,num_workers,is_trains,collate_fns):
+#         if is_train:
+#             shuffle = (sampler is None)
+#             drop_last = True
+#         else:
+#             shuffle = False
+#             drop_last = False
+#         loader = DataLoader(
+#             dataset,
+#             batch_size=bs,
+#             num_workers=n_worker,
+#             pin_memory=True,
+#             sampler=sampler,
+#             shuffle=shuffle,
+#             collate_fn=collate_fn,
+#             drop_last=drop_last,
+#         )              
+#         loaders.append(loader)
+#     return loaders  
+
 def create_sampler(datasets, shuffles, num_tasks, global_rank):
     samplers = []
-    for dataset,shuffle in zip(datasets,shuffles):
-        sampler = torch.utils.data.DistributedSampler(dataset, num_replicas=num_tasks, rank=global_rank, shuffle=shuffle)
+    for dataset, shuffle in zip(datasets, shuffles):
+        if dataset is None:  # Bỏ qua nếu dataset là None
+            samplers.append(None)
+            continue
+        sampler = torch.utils.data.DistributedSampler(
+            dataset, num_replicas=num_tasks, rank=global_rank, shuffle=shuffle
+        )
         samplers.append(sampler)
-    return samplers     
-
+    return samplers
 
 def create_loader(datasets, samplers, batch_size, num_workers, is_trains, collate_fns):
     loaders = []
-    for dataset,sampler,bs,n_worker,is_train,collate_fn in zip(datasets,samplers,batch_size,num_workers,is_trains,collate_fns):
+    for dataset, sampler, bs, n_worker, is_train, collate_fn in zip(
+        datasets, samplers, batch_size, num_workers, is_trains, collate_fns
+    ):
+        if dataset is None:  # Bỏ qua nếu dataset là None
+            loaders.append(None)
+            continue
         if is_train:
-            shuffle = (sampler is None)
+            shuffle = sampler is None
             drop_last = True
         else:
             shuffle = False
@@ -114,7 +177,8 @@ def create_loader(datasets, samplers, batch_size, num_workers, is_trains, collat
             shuffle=shuffle,
             collate_fn=collate_fn,
             drop_last=drop_last,
-        )              
+        )
         loaders.append(loader)
-    return loaders    
+    return loaders
+  
 

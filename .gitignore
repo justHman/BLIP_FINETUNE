@@ -1,5 +1,10 @@
-dataset/
+dataset/*
+!dataset/custom_dataset/
+!dataset/custom_dataset/*
+
 output/caption_uitvic
 weights/
 output/
 **/__pycache__/
+configs/caption_coco.yaml
+demo.ipynb

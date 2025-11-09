@@ -1,0 +1,25 @@
+{
+    "info": {
+        "description": "custom dataset"
+    },
+    "images": [
+        {
+            "id": 205086
+        },
+        {
+            "id": 304473
+        }
+    ],
+    "annotations": [
+        {
+            "image_id": 205086,
+            "caption": "mot cau be dang chong day tren qua banh",
+            "id": 7288
+        },
+        {
+            "image_id": 304473,
+            "caption": "mot cau be dang chong dau len qua bong da hit dat",
+            "id": 3395
+        }
+    ]
+}
