@@ -22,6 +22,9 @@
 ## 📑 Table of Contents
 
 - [🎯 Demo & Results](#-demo--results)
+  - [Qualitative Examples](#-qualitative-examples)
+  - [Training Metrics](#-training-metrics)
+  - [Quantitative Results](#-quantitative-results)
 - [✨ Features](#-features)
 - [🚀 Installation](#-installation)
 - [📊 Dataset Preparation](#-dataset-preparation)
@@ -42,32 +45,51 @@
 
 ## 🎯 Demo & Results
 
+### 🎨 Qualitative Examples
+
+Visual demonstration of the model's caption generation capabilities:
+
+<div align="center">
+
+<img src="resutls/demo/000000007615.jpg" width="600">
+
+**Sample Image: Baseball Player**
+
+| Model Type | Tokenizer | Generated Caption |
+|------------|-----------|------------------|
+| 🇻🇳 **Accented** | PhoBERT | *cầu thủ đánh bóng đang vung gậy để đánh bóng* |
+| 📝 **Unaccented** | BERT | *mot cau thu danh bong dang* |
+
+</div>
+
+The accented model (PhoBERT) produces more natural and detailed Vietnamese captions with proper diacritics, while the unaccented model (BERT) generates simplified Vietnamese text.
+
+---
+
 ### 📈 Training Metrics
 
 Visual representation of model performance during training:
 
 #### Loss Curves
-![Training Losses](resutls/losses.png)
+![Training Losses](resutls/eval/losses.png)
 *Model loss progression across training epochs*
 
 #### Evaluation Scores
-![Evaluation Scores](resutls/scores.png)
+![Evaluation Scores](resutls/eval/scores.png)
 *BLEU, ROUGE-L, and CIDEr metrics on validation set*
 
 ### 📊 Quantitative Results
 
 Model evaluation using standard image captioning metrics:
 
-| Dataset | Model | BLEU-1 | BLEU-2 | BLEU-3 | BLEU-4 | ROUGE-L | CIDEr |
-|---------|-------|--------|--------|--------|--------|---------|-------|
-| UITViC | Accented | 0.623 | 0.451 | 0.342 | 0.285 | 0.512 | 0.789 |
-| UITViC | Unaccented | 0.645 | 0.478 | 0.368 | 0.312 | 0.534 | 0.821 |
-| KTViC | Accented | 0.598 | 0.432 | 0.321 | 0.267 | 0.498 | 0.756 |
-| KTViC | Unaccented | 0.621 | 0.459 | 0.351 | 0.298 | 0.521 | 0.798 |
+| Dataset | Model | BLEU-1 | BLEU-2 | BLEU-3 | BLEU-4 | ROUGE-L | CIDEr | Score |
+|---------|-------|--------|--------|--------|--------|---------|-------|-------|
+| UITViC | Accented | 0.644 | 0.416 | 0.291 | 0.214 | 0.526 | 0.214 | 0.428 |
+| UITViC | Unaccented | 0.732 | 0.495 | 0.344 | **0.253** | **0.599** | **0.253** | **0.506** |
+| KTViC | Accented | 0.562 | 0.290 | 0.151 | 0.092 | 0.421 | 0.092 | 0.184 |
+| KTViC | Unaccented | **0.758** | **0.527** | **0.358** | 0.250 | 0.595 | 0.250 | 0.500 |
 
-### 🎨 Qualitative Examples
-
-Sample predictions from the trained model (coming soon - add your inference results here).
+---
 
 ---
 
@@ -127,7 +149,7 @@ python -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'CUDA Av
 
 Expected output:
 ```
-PyTorch: 1.10.0+cu113
+PyTorch: 2.6.0+cu124
 CUDA Available: True
 ```
 
@@ -182,14 +204,12 @@ These files contain image information and captions for training:
     {
       "id": 0,
       "image_id": 205086,
-      "caption": "đây là khung cảnh xuất hiện ở phía trước một căn nhà",
-      "segment_caption": "đây là khung_cảnh xuất_hiện ở phía trước một căn nhà"
+      "caption": "đây là khung cảnh xuất hiện ở phía trước một căn nhà"
     },
     {
       "id": 1,
       "image_id": 304473,
-      "caption": "có một căn nhà cao tầng xuất hiện ở trong bức ảnh",
-      "segment_caption": "có một căn nhà cao_tầng xuất_hiện ở trong bức ảnh"
+      "caption": "có một căn nhà cao tầng xuất hiện ở trong bức ảnh"
     }
   ]
 }
@@ -374,12 +394,12 @@ BLIP/weights/
 
 Quickly validate the training pipeline with a small dataset (10 samples):
 
-```bash
-python train_caption.py ^
-    --dataset custom ^
-    --config configs/accented_custom.yaml ^
-    --output_dir ./output/test_experiment ^
-    --device cuda ^
+```cmd
+python train_caption.py \
+    --dataset custom \
+    --config configs\accented_custom.yaml \
+    --output_dir .\output\test_experiment \
+    --device cuda \
     --quick_test
 ```
 
@@ -400,31 +420,31 @@ python train_caption.py ^
 
 #### 1️⃣ Train with Accented Vietnamese
 
-```bash
-python train_caption.py ^
-    --dataset custom ^
-    --config configs/accented_custom.yaml ^
-    --output_dir ./output/accented_custom ^
+```cmd
+python train_caption.py \
+    --dataset custom \
+    --config configs\accented_custom.yaml \
+    --output_dir .\output\accented_custom \
     --device cuda
 ```
 
 #### 2️⃣ Train with Unaccented Vietnamese
 
-```bash
-python train_caption.py ^
-    --dataset custom ^
-    --config configs/unaccented_custom.yaml ^
-    --output_dir ./output/unaccented_custom ^
+```cmd
+python train_caption.py \
+    --dataset custom \
+    --config configs\unaccented_custom.yaml \
+    --output_dir .\output\unaccented_custom \
     --device cuda
 ```
 
 #### 3️⃣ Train on CPU (if no GPU available)
 
-```bash
-python train_caption.py ^
-    --dataset custom ^
-    --config configs/accented_custom.yaml ^
-    --output_dir ./output/accented_custom ^
+```cmd
+python train_caption.py \
+    --dataset custom \
+    --config configs\accented_custom.yaml \
+    --output_dir .\output\accented_custom \
     --device cpu
 ```
 
@@ -432,12 +452,12 @@ python train_caption.py ^
 
 Evaluate a trained model on the test set without training:
 
-```bash
-python train_caption.py ^
-    --dataset custom ^
-    --config configs/accented_custom.yaml ^
-    --output_dir ./output/accented_custom ^
-    --device cuda ^
+```cmd
+python train_caption.py \
+    --dataset custom \
+    --config configs\accented_custom.yaml \
+    --output_dir .\output\accented_custom \
+    --device cuda \
     --evaluate
 ```
 
@@ -445,7 +465,7 @@ python train_caption.py ^
 - Load the best checkpoint from `output_dir`
 - Run inference on test set
 - Compute BLEU, ROUGE-L, and CIDEr metrics
-- Save results to `output_dir/result/`
+- Save results to `output_dir\result\`
 
 ### 📁 Training Output
 
@@ -469,23 +489,22 @@ output/your_experiment/
 
 ### Run Inference on an Image
 
-#### 1️⃣ With Beam Search (Default)
+#### 1️⃣ Accented Vietnamese (with diacritics)
 
 ```bash
-python inference.py ^
-    --image_path "path/to/your/image.jpg" ^
-    --model_path "output/your_experiment/checkpoint_best.pth" ^
-    --device cuda
+python inference.py --image_path "path/to/your/image.jpg" --model_path "weights/accented_uitvic_20e.pth" --tokenizer "vinai/phobert-base" --device cuda
 ```
 
-#### 2️⃣ With Nucleus Sampling
+#### 2️⃣ Unaccented Vietnamese (without diacritics)
 
 ```bash
-python inference.py ^
-    --image_path "path/to/your/image.jpg" ^
-    --model_path "output/your_experiment/checkpoint_best.pth" ^
-    --device cuda ^
-    --sample
+python inference.py --image_path "path/to/your/image.jpg" --model_path "weights/unaccented_uitvic_20e.pth" --tokenizer "bert-base-uncased" --device cuda
+```
+
+#### 3️⃣ With Nucleus Sampling
+
+```bash
+python inference.py --image_path "path/to/your/image.jpg" --model_path "weights/unaccented_uitvic_20e.pth" --tokenizer "bert-base-uncased" --device cuda --sample
 ```
 
 ### 🎛️ Inference Parameters
@@ -494,24 +513,21 @@ python inference.py ^
 |---------|-------|----------|
 | `--image_path` | Path to image for captioning | None (uses demo image) |
 | `--model_path` | Path to model checkpoint | **Required** |
+| `--tokenizer` | Tokenizer: `bert-base-uncased` (unaccented) or `vinai/phobert-base` (accented) | `bert-base-uncased` |
 | `--device` | Device (cuda/cpu) | cuda (if available) |
 | `--sample` | Use nucleus sampling instead of beam search | False |
 
 ### 💡 Examples
 
 ```bash
-# Inference with pretrained model
-python inference.py ^
-    --image_path "dataset/custom_dataset/test_images/205086.png" ^
-    --model_path "weights/accented_uitvic_20e.pth" ^
-    --device cuda
+# Inference with accented model (PhoBERT tokenizer)
+python inference.py --image_path "dataset/custom_dataset/test_images/205086.png" --model_path "weights/accented_uitvic_20e.pth" --tokenizer "vinai/phobert-base" --device cuda
 
-# Inference with newly trained model
-python inference.py ^
-    --image_path "my_image.jpg" ^
-    --model_path "output/accented_custom/checkpoint_best.pth" ^
-    --device cuda ^
-    --sample
+# Inference with unaccented model (BERT tokenizer)
+python inference.py --image_path "dataset/custom_dataset/test_images/205086.png" --model_path "weights/unaccented_uitvic_20e.pth" --tokenizer "bert-base-uncased" --device cuda
+
+# Inference with nucleus sampling
+python inference.py --image_path "my_image.jpg" --model_path "output/accented_custom/checkpoint_best.pth" --tokenizer "vinai/phobert-base" --device cuda --sample
 ```
 
 ---

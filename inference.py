@@ -34,11 +34,13 @@ def parse_args():
     parser.add_argument('--model_path', type=str, required=True, help='Path to the pretrained model')
     parser.add_argument('--device', type=str, default='cuda' if torch.cuda.is_available() else 'cpu', help='Device to run the model on (cuda or cpu)')
     parser.add_argument('--sample', action='store_true', help='Use nucleus sampling instead of beam search')
+    parser.add_argument('--tokenizer', type=str, default='bert-base-uncased', choices=['bert-base-uncased', 'vinai/phobert-base'], 
+                        help='Tokenizer to use: bert-base-uncased for unaccented Vietnamese, vinai/phobert-base for accented Vietnamese')
     return parser.parse_args()
 
 def main(args):
     image = load_demo_image(image_path=args.image_path, image_size=384, device=args.device)  
-    model = blip_decoder(pretrained=args.model_path, image_size=384, vit='base')
+    model = blip_decoder(pretrained=args.model_path, tokenizer=args.tokenizer, image_size=384, vit='base')
     model.eval()
     model = model.to(args.device)
     print('Model loaded.')
