@@ -47,22 +47,41 @@
 
 ### 🎨 Qualitative Examples
 
-Visual demonstration of the model's caption generation capabilities:
+Visual demonstration of the model's caption generation capabilities on different datasets:
 
 <div align="center">
 
-<img src="resutls/demo/000000007615.jpg" width="600">
+#### UITViC Dataset
+
+<img src="resutls/demo/000000007615.jpg" width="500">
 
 **Sample Image: Baseball Player**
 
 | Model Type | Tokenizer | Generated Caption |
 |------------|-----------|------------------|
 | 🇻🇳 **Accented** | PhoBERT | *cầu thủ đánh bóng đang vung gậy để đánh bóng* |
-| 📝 **Unaccented** | BERT | *mot cau thu danh bong dang* |
+| 📝 **Unaccented** | BERT | *nguoi dan ong mac do trang dang choi bong chay tren san* |
+
+---
+
+#### KTViC Dataset
+
+<img src="resutls/demo/00000000008.jpg" width="500">
+
+**Sample Image: Street Scene**
+
+| Model Type | Tokenizer | Generated Caption |
+|------------|-----------|------------------|
+| 🇻🇳 **Accented** | PhoBERT | *có một vài người đang di chuyển ở trên đường* |
+| 📝 **Unaccented** | BERT | *co nhieu nguoi dang xuat hien o tren duong phia sau cua nguoi dan* |
 
 </div>
 
-The accented model (PhoBERT) produces more natural and detailed Vietnamese captions with proper diacritics, while the unaccented model (BERT) generates simplified Vietnamese text.
+**📝 Key Observations:**
+- The **accented model** (PhoBERT) generates more natural Vietnamese with proper diacritics
+- The **unaccented model** (BERT) produces simplified Vietnamese without tone marks
+- Both models successfully capture the main subjects and actions in the images
+- Caption quality varies by dataset and model configuration
 
 ---
 
